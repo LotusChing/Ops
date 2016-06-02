@@ -1,4 +1,10 @@
-#!/bin/bash
+#!/bin/bash -e
+
+green="\033[32m"
+red="\033[31m"
+over="\033[0m"
+base=`pwd`
+null="/dev/null"
 
 temp_dir="/tmp/openssh-install"
 pam_sshd="/etc/pam.d/sshd"
@@ -8,48 +14,58 @@ openssh67="openssh-7.1p1-el67.tar.gz"
 
 [ ! -d $temp_dir ] && mkdir -p $temp_dir
 
-dropbear(){
-    cd $temp_dir
-    wget forever.felicity.family/tarball/dropbear.tar.gz
-    tar xf dropbear.tar.gz && bash Dropbear.sh
-}
-
 backup(){
     cp -f ${pam_sshd}{,.default}
     cp -f ${sshd_config}{,.default}
 }
 
-uninstall(){
-    rpm -e systemtap-client systemtap git perl-Git 
-    rpm -e `rpm -qa|grep openssh`
+
+download(){
+    echo "###### Download ######"
+    wget forever.felicity.family/tarball/${openssh67} -P ${temp_dir}/ &> $null
+    [ $? -eq 0 ]  && echo -e "Download OpenSSH \t ${green}[OK]${over}" || echo -e "Download OpenSSH \t ${red}[Failed]${over}"   
+    cd ${temp_dir} && tar xf ${openssh67} &> ${null}
 }
 
-openssh(){
-    wget forever.felicity.family/tarball/${openssh67}
-    tar xf ${openssh67}
-    rpm -Uvh *.rpm
+uninstall(){
+    echo "###### Remove Old OpenSSH ######"
+    rpm -e systemtap-client systemtap git perl-Git 
+    rpm -e `rpm -qa|grep openssh`
+    [ $? -eq 0 ]  && echo -e "Remove OpenSSH \t ${green}[OK]${over}" || echo -e "Remove OpenSSH \t ${red}[Failed]${over}"
+}
+
+install(){
+    echo "###### Install New OpenSSH ######"
+    rpm -Uvh *.rpm &> ${null}
+    [ $? -eq 0 ]  && echo -e "Install OpenSSH \t ${green}[OK]${over}" || echo -e "Install OpenSSH \t ${red}[Failed]${over}"
     rm -f ${pam_sshd} ${sshd_config}
     cp -f ${pam_sshd}.default    ${pam_sshd}
     cp -f ${sshd_config}.default ${sshd_config}
     sed -r -i 's/#PermitRootLogin\ yes/PermitRootLogin\ yes/g' ${sshd_config}
 }
 
-clean(){
-    rm -rf ${temp_dir}
+startup(){
+    echo "###### Startup ######"
+    userdel sshd && useradd -u 555 -M -s /sbin/nologin sshd
+    /etc/init.d/sshd stop &> ${null}
+    netstat -tunlp|grep ssh || /etc/init.d/sshd start &> ${null}
+    [ $? -eq 0 ]  && echo -e "Start OpenSSH \t ${green}[OK]${over}" || echo -e "Start OpenSSH \t ${red}[Failed]${over}"
 }
 
-startup(){
-    userdel sshd && useradd -u 555 -M -s /sbin/nologin sshd
-    netstat -tunlp|grep ssh || /etc/init.d/sshd start
+clean(){
+    echo "###### Clean ######"
+    rm -rf ${temp_dir}
+    rm -f ${base}/install_openssh-7.1.sh
+    echo "Clean some temp file"
 }
 
 go(){
-    dropbear
     backup
+    download
     uninstall
-    openssh
-    clean   
+    install
     startup
+    clean   
 }
 
 $1

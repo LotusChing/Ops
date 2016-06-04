@@ -55,7 +55,7 @@ yum -y install \
 }
 
 go(){
-    repo
+   # repo
     limit
     network
     base_package 

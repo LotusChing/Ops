@@ -17,7 +17,7 @@ inital(){
 download(){
     echo '###### Download ######'
     wget forever.felicity.family/tarball/$package  &> $null
-    [ $? -eq 0 ]  && echo -e "Download Redis \t ${green}[OK]${over}" || echo -e "Download Redis \t ${red}[Failed]${over}" 
+    [ $? -eq 0 ]  && echo -e "Download Redis \t ${green}[OK]${over}" || echo -e "Download Redis \t ${red}[Failed]${over}"
 }
 
 compile(){
@@ -39,30 +39,38 @@ config(){
     echo '###### Configure ######'
     echo "export PATH=$PATH:/usr/local/redis/bin:/usr/local/redis/sbin" >>/etc/profile
     source /etc/profile
-    sed -r -i '7c EXEC=/usr/local/redis/bin/redis-server' /etc/init.d/redis   
-    sed -r -i '8c CLIEXEC=/usr/local/redis/bin/redis-cli' /etc/init.d/redis   
-    [ $? -eq 0 ]  && echo -e "Config Redis \t ${green}[OK]${over}"  || echo -e "Config Redis \t ${red}[Failed]${over}"
+    sed -r -i '7c EXEC=/usr/local/redis/bin/redis-server' /etc/init.d/redis
+    sed -r -i '8c CLIEXEC=/usr/local/redis/bin/redis-cli' /etc/init.d/redis
+    [ $? -eq 0 ]  && echo -e "Config Redis \t ${green}[OK]${over}"   || echo -e "Config Redis \t ${red}[Failed]${over}"
 }
 
 startup(){
     echo '###### Startup ######'
-    /etc/init.d/redis start   
+    /etc/init.d/redis start
 }
 
 clean(){
     echo '###### Clean ######'
     rm -rf $temp_dir
-    [ $? -eq 0 ]  && echo -e "Clean temp file \t ${green}[OK]${over}"  || echo -e "Clean temp file \t ${red}[Failed]${over}"
+    [ $? -eq 0 ]  && echo -e "Clean temp file \t ${green}[OK]${over}" || echo -e "Clean temp file \t ${red}[Failed]${over}"
 }
 
 readme(){
-    echo '''
-    Redis Binary: /usr/local/redis/
-    Redis Config: /etc/redis
-    Reids Port:   6379
-    '''
+  echo '''
+  Redis Binary: /usr/local/redis/
+  Redis Config: /etc/redis
+  Reids Port:   6379
+  ''' >>/usr/local/redis/readme.txt
 }
 
-go
+go(){
+  inital
+  download
+  compile
+  install
+  config
+  startup
+  clean
+  readme
+}
 
-$1

@@ -75,6 +75,14 @@ startup(){
     lsof -i :10051 &> ${null} || service zabbix-server start  && echo "start zabbix ok"
 }
 
+readme(){
+  echo """
+  soft: php php-common mysql mysql-server zabbix22-agent zabbix22-web-mysql zabbix22-server-mysql
+  port: 80 3306 10051
+  path: /etc/zabbix/  /var/log/zabbixsrv/
+""" > /etc/zabbix/readme.txt
+}
+
 clean(){
     rm -f $base/$0
 }
@@ -84,6 +92,7 @@ go(){
     php
     mysql
     zabbix
+    readme
     startup
     clean
 }

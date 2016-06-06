@@ -1,48 +1,43 @@
-#!/bin/bash
-Null="/dev/null"
+#!/bin/bash 
+set -e
+green="\033[32m"
+red="\033[31m"
+over="\033[0m"
+base=`pwd`
+null="/dev/null"
 dbuser="root"
 dbpass=`cat /root/.pass`
 dbsock="/tmp/mysql.sock"
-mysql_cmd="/usr/local/mysql/bin/mysql"
+mysql_cmd="/usr/bin/mysql"
 php_conf="/etc/php.ini"
-tools_dir="/root/Scripts"
 
-#inital repo
-repo(){
-    bash ${tools_dir}/centos-inital.sh repo
-}
-
-#install packages
 pkgs(){
     echo "######Install Packages######"
-    yum -y install php php-common mysql mysql-server zabbix22-agent zabbix22-web-mysql zabbix22-server-mysql 
-    echo "Done."
+    yum -y install php php-common mysql mysql-server zabbix22-agent zabbix22-web-mysql zabbix22-server-mysql &> $null
+    [ $? -eq 0 ]  && echo -e "Install Zabbix Server \t ${green}[OK]${over}" || echo -e "Install Zabbix Server\t ${red}[Failed]${over}"
 }
 
-#inital php
 php(){
     echo "######Configure PHP######"
     sed -r -i '729c post_max_size = 16M'             ${php_conf}
     sed -r -i '449c max_input_time = 300'            ${php_conf}
     sed -r -i '440c max_execution_time = 300'        ${php_conf}
     sed -r -i '946c date.timezone = Asia\/Shanghai'  ${php_conf}
-    echo "Done."
+    [ $? -eq 0 ]  && echo -e "Configure PHP \t ${green}[OK]${over}" || echo -e "Configure PHP \t ${red}[Failed]${over}"
 }
 
-#inital mysql
 mysql(){
     echo "######Configure MySQL######"
-    mysqladmin -u root password '123123'
-    ${mysql_cmd} -u${dbuser} -p${dbpass} -e "create database zabbix character set utf8;"
-    ${mysql_cmd} -u${dbuser} -p${dbpass} -e "grant all on zabbix.* to 'monit0r'@'localhost' identified by 'monit0r';"
-    ${mysql_cmd} -u${dbuser} -p${dbpass} -e "flush privileges;"
-    ${mysql_cmd} -u${dbuser} -p${dbpass} zabbix < /usr/share/zabbix-mysql/schema.sql
-    ${mysql_cmd} -u${dbuser} -p${dbpass} zabbix < /usr/share/zabbix-mysql/images.sql
-    ${mysql_cmd} -u${dbuser} -p${dbpass} zabbix < /usr/share/zabbix-mysql/data.sql
-    echo "Done."
+    ${mysql_cmd} -u${dbuser} -p${dbpass} -e "create database zabbix character set utf8;" && \
+    ${mysql_cmd} -u${dbuser} -p${dbpass} -e "grant all on zabbix.* to 'monit0r'@'localhost' identified by 'monit0r';" && \
+    ${mysql_cmd} -u${dbuser} -p${dbpass} -e "flush privileges;" && \
+    ${mysql_cmd} -u${dbuser} -p${dbpass} zabbix < /usr/share/zabbix-mysql/schema.sql && \
+    ${mysql_cmd} -u${dbuser} -p${dbpass} zabbix < /usr/share/zabbix-mysql/images.sql && \
+    ${mysql_cmd} -u${dbuser} -p${dbpass} zabbix < /usr/share/zabbix-mysql/data.sql   && 
+    [ $? -eq 0 ]  && echo -e "Configure MySQL \t ${green}[OK]${over}" || echo -e "Configure MySQL \t ${red}[Failed]${over}"
+    
 }
 
-#install zabbix
 zabbix(){    
     echo "######Configure Zabbix######"
     cp /etc/zabbix/zabbix_server.conf{,.default}
@@ -57,27 +52,31 @@ DBPassword=${dbpass}
 DBSocket=${dbsock}
 DBPort=3306
 ListenIP=127.0.0.1
+Timeout=30
 AlertScriptsPath=/var/lib/zabbixsrv/alertscripts
 ExternalScripts=/var/lib/zabbixsrv/externalscripts
 TmpDir=/var/lib/zabbixsrv/tmp
 EOF
-    echo "Done."
+    [ $? -eq 0 ]  && echo -e "Configure Zabbix Server \t ${green}[OK]${over}" || echo -e "Configure Zabbix Server \t ${red}[Failed]${over}"
 }
 
 startup(){
     echo "###### Startup Service ######"
-    lsof -i :80    &> ${Null} || service httpd  start         && echo "start httpd  ok"
-    lsof -i :3306  &> ${Null} || service mysqld start         && echo "start mysqld ok"
-    lsof -i :10051 &> ${Null} || service zabbix-server start  && echo "start zabbix ok"
-    echo "Done."
+    lsof -i :80    &> ${null} || service httpd  start      
+    lsof -i :3306  &> ${null} || service mysqld start      
+    lsof -i :10051 &> ${null} || service zabbix-server start 
+}
+
+clean(){
+    rm -f $base/$0
 }
 
 go(){
-    repo
     pkgs
     php    
     mysql  
     zabbix
     startup
+    clean
 }
 $1

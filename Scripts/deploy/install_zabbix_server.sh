@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 #!/bin/bash 
 set -e
-=======
 #!/bin/bash -e
->>>>>>> e345f310a3f8733179297b4afb5d6f9f081d818a
 green="\033[32m"
 red="\033[31m"
 over="\033[0m"
@@ -15,18 +12,11 @@ dbsock="/tmp/mysql.sock"
 mysql_cmd="/usr/bin/mysql"
 php_conf="/etc/php.ini"
 
-<<<<<<< HEAD
 pkgs(){
     echo "######Install Packages######"
     yum -y install php php-common mysql mysql-server zabbix22-agent zabbix22-web-mysql zabbix22-server-mysql &> $null
     [ $? -eq 0 ]  && echo -e "Install Zabbix Server \t ${green}[OK]${over}" || echo -e "Install Zabbix Server\t ${red}[Failed]${over}"
-=======
-#install packages
-pkgs(){
-    echo "######Install Packages######"
-    yum -y install php php-common mysql mysql-server zabbix22-agent zabbix22-web-mysql zabbix22-server-mysql
-    echo "Done."
->>>>>>> e345f310a3f8733179297b4afb5d6f9f081d818a
+
 }
 
 php(){
@@ -45,21 +35,18 @@ mysql(){
     ${mysql_cmd} -u${dbuser} -p${dbpass} -e "flush privileges;" && \
     ${mysql_cmd} -u${dbuser} -p${dbpass} zabbix < /usr/share/zabbix-mysql/schema.sql && \
     ${mysql_cmd} -u${dbuser} -p${dbpass} zabbix < /usr/share/zabbix-mysql/images.sql && \
-<<<<<<< HEAD
     ${mysql_cmd} -u${dbuser} -p${dbpass} zabbix < /usr/share/zabbix-mysql/data.sql   && 
     [ $? -eq 0 ]  && echo -e "Configure MySQL \t ${green}[OK]${over}" || echo -e "Configure MySQL \t ${red}[Failed]${over}"
     
 }
 
 zabbix(){    
-=======
     ${mysql_cmd} -u${dbuser} -p${dbpass} zabbix < /usr/share/zabbix-mysql/data.sql
     [ $? -eq 0 ]  && echo -e "Inital \t ${green}[OK]${over}"         || echo -e "Inital \t ${red}[Failed]${over}"
 }
 
 #install zabbix
 zabbix(){
->>>>>>> e345f310a3f8733179297b4afb5d6f9f081d818a
     echo "######Configure Zabbix######"
     cp /etc/zabbix/zabbix_server.conf{,.default}
     cat > /etc/zabbix/zabbix_server.conf << EOF
@@ -81,22 +68,15 @@ EOF
     [ $? -eq 0 ]  && echo -e "Configure Zabbix Server \t ${green}[OK]${over}" || echo -e "Configure Zabbix Server \t ${red}[Failed]${over}"
 }
 
+
 startup(){
-    echo "###### Startup Service ######"
-<<<<<<< HEAD
-    lsof -i :80    &> ${null} || service httpd  start      
-    lsof -i :3306  &> ${null} || service mysqld start      
-    lsof -i :10051 &> ${null} || service zabbix-server start 
+    lsof -i :80    &> ${null} || service httpd  start         && echo "start httpd  ok"
+    lsof -i :3306  &> ${null} || service mysqld start         && echo "start mysqld ok"
+    lsof -i :10051 &> ${null} || service zabbix-server start  && echo "start zabbix ok"
 }
 
 clean(){
     rm -f $base/$0
-=======
-    lsof -i :80    &> ${null} || service httpd  start         && echo "start httpd  ok"
-    lsof -i :3306  &> ${null} || service mysqld start         && echo "start mysqld ok"
-    lsof -i :10051 &> ${null} || service zabbix-server start  && echo "start zabbix ok"
-    echo "Done."
->>>>>>> e345f310a3f8733179297b4afb5d6f9f081d818a
 }
 
 go(){

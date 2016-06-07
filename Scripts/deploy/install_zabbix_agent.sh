@@ -19,7 +19,7 @@ install(){
 config(){
     echo '###### Config ######'
     cp -f ${zabbix_agent_conf}{,.default}
-    curl -s forever.felicity.family/Ops/Scripts/zabbix/check_system_util_info.sh > /etc/zabbix/check_system_util_info.sh
+    curl -s deploy.felicity.family/Ops/Scripts/zabbix/check_system_util_info.sh > /etc/zabbix/check_system_util_info.sh
     echo """
 PidFile=/var/run/zabbix/zabbix_agentd.pid
 LogFile=/var/log/zabbix/zabbix_agentd.log

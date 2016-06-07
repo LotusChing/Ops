@@ -8,7 +8,7 @@ base=`pwd`
 null="/dev/null"
 temp_dir="/tmp/install-dropbear"
 pkgs_name="dropbear-compiled.tar.gz"
-domain_name="forever.felicity.family"
+domain_name="deploy.felicity.family"
 conf_dir="${domain_name}/Ops/Configure-File"
 script_dir="${domain_name}/Ops/Scripts"
 

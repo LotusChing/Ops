@@ -41,15 +41,15 @@ function disk_free(){
 }
 
 function memory_total(){
-    free -m | awk '/Mem/ {print $2}'
+    free -b | awk '/Mem/ {print $2}'
 }
 
 function memory_use(){
-    free -m | awk '/cache:/ {print $3}'
+    free -b | awk '/cache:/ {print $3}'
 }
 
 function memory_free(){
-    free -m | awk '/cache:/ {print $4}'
+    free -b | awk '/cache:/ {print $4}'
 }
 
 function tx_kb(){

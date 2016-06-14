@@ -52,26 +52,23 @@ function memory_free(){
     free -m | awk '/cache:/ {print $4}'
 }
 
-function rx_bytes(){
-    rbps=` cat /sys/class/net/eth0/statistics/rx_bytes`
-    rkbps=`expr $rbps / 1024`
-    echo $rkbps
+function tx_kb(){
+    tx_bytes=`ifconfig eth0 | awk  '/RX bytes/ {split($2,a,":"); print a[2]}'`
+    echo $tx_bytes
 }
 
-function tx_bytes(){
-    tbps=` cat /sys/class/net/eth0/statistics/tx_bytes`
-    tkbps=`expr $tbps / 1024`
-    echo $tkbps
+function rx_kb(){
+    rx_bytes=`ifconfig eth0 | awk  '/RX bytes/ {split($6,a,":"); print a[2]}'`
+    echo $rx_bytes
 }
 
-function rx_packets(){
-    rpkts=`cat /sys/class/net/eth0/statistics/rx_packets`
-    echo $rpkts
+
+function established(){
+    ss -ant | awk '/ESTAB/ {print $1}'| uniq -c | awk '{print $1}'
 }
 
-function tx_packets(){
-    tpkts=`cat /sys/class/net/eth0/statistics/tx_packets`
-    echo $tpkts
+function timewait(){
+    ss -ant | awk '/TIME-WAIT/ {print $1}'| uniq -c | awk '{print $1}'
 }
 
 function help(){
@@ -80,7 +77,7 @@ Usage: bash $0 [function]
 functions:
     CPU : [ cpu_util_user | cpu_util_sys | cpu_util_idle ]
     Mem : [ memory_total  | memory_use   | memory_free   ]
-    Net : [ rx_bytes      | tx_bytes     | rx_packets  | tx_packets ]
+    Net : [ rx_bytes      | tx_bytes     | established | timewait ]
     Disk: [ disk_iowait   | disk_ioutil  | disk_size   | disk_use   | disk_free | disk_use_percent]
     """
 }

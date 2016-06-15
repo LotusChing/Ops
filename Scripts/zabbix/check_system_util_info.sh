@@ -41,7 +41,7 @@ function disk_free(){
 }
 
 function memory_total(){
-    free -m | awk '/Mem/ {print $2}'
+    free -b | awk '/Mem/ {print $2}'
 }
 
 function memory_use(){

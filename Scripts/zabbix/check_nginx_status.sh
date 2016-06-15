@@ -39,4 +39,12 @@ function writing-client-header {
 function waiting-request {
    /usr/bin/curl -s http://$HOST:$PORT/status | awk '/Waiting/ {print $6}'
 }
+
+function help(){
+    echo """
+Usage: bash $0 [function]
+functions:
+    [ ping | active-connections | process-conn | accepts-handled | process-request | process-request-time | reading-client-header | writing-client-header | waiting-request ]
+    """
+}
 $1

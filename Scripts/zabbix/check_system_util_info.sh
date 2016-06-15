@@ -45,11 +45,11 @@ function memory_total(){
 }
 
 function memory_use(){
-    free -m | awk '/cache:/ {print $3}'
+    free -b | awk '/cache:/ {print $3}'
 }
 
 function memory_free(){
-    free -m | awk '/cache:/ {print $4}'
+    free -b | awk '/cache:/ {print $4}'
 }
 
 function tx_kb(){

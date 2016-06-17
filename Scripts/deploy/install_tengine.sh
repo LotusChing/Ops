@@ -43,13 +43,15 @@ startup(){
 
 clean(){
     echo '###### clean ######'
-
+    /opt/tengine/sbin/nginx
     [ $? -eq 0 ] && echo -e "Clean $soft \t ${green}[OK]${over}"    || echo -e "Clean $soft \t ${red}[Failed]${over}"
 }
 
 readme(){
     echo '###### Generate readme ######'
-
+    Soft: Tengine-2.1.2
+    Path: /opt/tengine
+    Port: 80
     [ $? -eq 0 ] && echo -e "Generate readme $soft \t ${green}[OK]${over}" || echo -e "Generate readme $soft \t ${red}[Failed]${over}"
 }
 

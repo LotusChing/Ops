@@ -22,7 +22,7 @@ backup(){
 
 download(){
     echo "###### Download ######"
-    wget forever.felicity.family/tarball/${openssh67} -P ${temp_dir}/ &> $null
+    wget deploy.felicity.family/tarball/${openssh67} -P ${temp_dir}/ &> $null
     [ $? -eq 0 ]  && echo -e "Download OpenSSH \t ${green}[OK]${over}" || echo -e "Download OpenSSH \t ${red}[Failed]${over}"   
     cd ${temp_dir} && tar xf ${openssh67} &> ${null}
 }

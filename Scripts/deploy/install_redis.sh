@@ -41,7 +41,7 @@ config(){
     source /etc/profile
     sed -r -i '7c EXEC=/usr/local/redis/bin/redis-server' /etc/init.d/redis
     sed -r -i '8c CLIEXEC=/usr/local/redis/bin/redis-cli' /etc/init.d/redis
-    curl -s http://forever.felicity.family/Ops/Configure-File/redis.conf > /etc/redis/6379.conf
+    curl -s http://deploy.felicity.family/Ops/Configure-File/redis.conf > /etc/redis/6379.conf
     [ $? -eq 0 ]  && echo -e "Config Redis \t ${green}[OK]${over}"   || echo -e "Config Redis \t ${red}[Failed]${over}"
 }
 

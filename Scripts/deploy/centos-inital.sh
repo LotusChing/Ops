@@ -7,7 +7,7 @@ echo "====== Yum ======"
 mkdir ${Repo_dir}/default
 mv ${Repo_dir}/* ${Repo_dir}/default/ &> ${Null}
 echo "Download yum file..."
-wget forever.felicity.family/deploy/yum/ali-yum.tar.gz &> ${Null}
+wget deploy.felicity.family/deploy/yum/ali-yum.tar.gz &> ${Null}
 tar xf ali-yum.tar.gz -C ${Repo_dir}/ &> ${Null}
 echo "Download Done."
 echo "Clean yum cache."

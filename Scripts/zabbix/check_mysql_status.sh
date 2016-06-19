@@ -1,35 +1,50 @@
 #!/bin/bash
-DBUser="zabbix"
-DBPass=`cat /var/lib/mysql/.mysqlpass`
-DBHost="192.168.0.169"
+user=root
+pass=`cat /root/.pass`
+null=/dev/null
+cmd="mysqladmin -u$user -p$pass extended-status"
 
-case $1 in 
-	Uptime)
-	    result=`mysqladmin -u$DBUser -p$DBPass -h $DBHost status|awk -F"  " '{print $1}'|awk -F": " '{print $2}'`
-	    echo $result
-	;;
-	
-	Thread)
-	    thread=`mysqladmin -u$DBUser -p$DBPass -h $DBHost status|awk -F"  " '{print $2}'|awk -F": " '{print $2}'`
-            echo $thread
-	;;
-		
-	Slow-queries)
-	    slow_queries=`mysqladmin -u$DBUser -p$DBPass  -h $DBHost status|awk -F"  " '{print $4}'|awk -F": " '{print $2}'`
-	    echo $slow_queries
-	;;
-	
-	Open-tables)
-	    open_tables=`mysqladmin -u$DBUser -p$DBPass -h $DBHost status|awk -F"  " '{print $7}'|awk -F": " '{print $2}'`
-            echo $open_tables
-	;;
-	
-	Per-second-query)
-	    per_second_query=`mysqladmin -u$DBUser -p$DBPass -h $DBHost status|awk -F"  " '{print $NF}'|awk -F": " '{print $2}'`
-	    echo $per_second_query
-	;;
+function ping {
+    mysqladmin -u$user -p$pass ping &> $null && echo 1
+}
 
-	*)
-	    echo "Usage:$0 (Uptime|Thread|Slow-queries|Open-tables|Per-second-query)"
-	;;
-esac
+function connected {
+    $cmd | awk '/Threads_connected/ {print $4}'
+}
+
+function select {
+    $cmd | awk '/Innodb_rows_read/ {print $4}'
+}
+
+function insert {
+    $cmd | awk '/Innodb_rows_inserted/ {print $4}'
+}
+
+function update {
+    $cmd | awk '/Innodb_rows_updated/ {print $4}'
+}
+
+function insert {
+    $cmd | awk '/Innodb_rows_deleted/ {print $4}'
+}
+
+function qps {
+    $cmd | awk '/Queries/ {print $4}'
+}
+
+function tps {
+    commit=`$cmd | awk '/Com_commit/    {print $4}'`
+    rollback=`$cmd | awk '/Com_rollback / {print $4}'`
+    sum=`expr $commit + $rollback`
+    echo "$sum"
+}
+
+function help(){
+    echo """
+Usage: bash $0 [function]
+functions:
+    [ ping | connected | select | insert | update | delete | qps | tps ]
+    """
+}
+
+$1

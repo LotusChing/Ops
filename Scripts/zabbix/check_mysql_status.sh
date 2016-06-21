@@ -1,6 +1,6 @@
 #!/bin/bash
 user=root
-pass=`cat /root/.pass`
+pass=`cat /home/.pass`
 null=/dev/null
 cmd="mysqladmin -u$user -p$pass extended-status"
 
@@ -13,19 +13,19 @@ function connected {
 }
 
 function select {
-    $cmd | awk '/Innodb_rows_read/ {print $4}'
+    $cmd | awk '/Com_select/ {print $4}'
 }
 
 function insert {
-    $cmd | awk '/Innodb_rows_inserted/ {print $4}'
+    $cmd | awk '/Com_insert / {print $4}'
 }
 
 function update {
-    $cmd | awk '/Innodb_rows_updated/ {print $4}'
+    $cmd | awk '/Com_update / {print $4}'
 }
 
-function insert {
-    $cmd | awk '/Innodb_rows_deleted/ {print $4}'
+function delete {
+    $cmd | awk '/Com_delete / {print $4}'
 }
 
 function qps {
@@ -39,11 +39,28 @@ function tps {
     echo "$sum"
 }
 
+function commit {
+    $cmd | awk '/Com_commit/    {print $4}'
+}
+
+function rollback {
+    $cmd | awk '/Com_rollback / {print $4}'
+}
+
+function bytes_sent {
+    $cmd | awk '/Bytes_sent/ {print $4}'
+}
+
+function bytes_received {
+    $cmd | awk '/Bytes_received/ {print $4}'
+}
+
+
 function help(){
     echo """
 Usage: bash $0 [function]
 functions:
-    [ ping | connected | select | insert | update | delete | qps | tps ]
+    [ ping | connected | select | insert | update | delete | qps | tps | commit | rollback | bytes_sent | bytes_recevied ]
     """
 }
 

@@ -33,7 +33,7 @@ function qps {
 }
 
 function tps {
-    commit=`$cmd | awk '/Com_commit/    {print $4}'`
+    commit=`$cmd   | awk '/Com_commit/    {print $4}'`
     rollback=`$cmd | awk '/Com_rollback / {print $4}'`
     sum=`expr $commit + $rollback`
     echo "$sum"
@@ -60,7 +60,7 @@ function help(){
     echo """
 Usage: bash $0 [function]
 functions:
-    [ ping | connected | select | insert | update | delete | qps | tps | commit | rollback | bytes_sent | bytes_recevied ]
+    [ ping | connected | select | insert | update | delete | qps | tps | commit | rollback | bytes_sent | bytes_received ]
     """
 }
 

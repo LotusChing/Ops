@@ -21,7 +21,7 @@ download(){
 compile(){
     echo '###### Compile ######'
     yum -y groupinstall "development tools" &> $null
-    cd $temp_dir && tar xf $pkgs
+    cd $temp_dir && tar xf $pkgs && cd $temp_dir/$soft
     cmake . -DCMAKE_INSTALL_PREFIX=$mysql_path \
     -DMYSQL_DATADIR=$dbfile \
     -DMYSQL_UNIX_ADDR=$dbfile/mysql.sock \
@@ -33,13 +33,12 @@ compile(){
     -DWITH_FEDERATED_STORAGE_ENGINE=1 \
     -DWITH_BLACKHOLE_STORAGE_ENGINE=1 \
     -DWITHOUT_EXAMPLE_STORAGE_ENGINE=1 \
-    -DWITHOUT_PARTITION_STORAGE_ENGINE=1 \
     -DWITH_FAST_MUTEXES=1 \
     -DWITH_ZLIB=bundled \
     -DENABLED_LOCAL_INFILE=1 \
     -DWITH_READLINE=1 \
     -DWITH_EMBEDDED_SERVER=1 \
-    -DWITH_DEBUG=0  && make -j  && make install
+    -DWITH_DEBUG=0 && make && make install
     [ $? -eq 0 ] && echo -e "Compile $soft \t ${green}[OK]${over}"   || echo -e "Compile $soft \t ${red}[Failed]${over}"
 }
 

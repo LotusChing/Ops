@@ -5,8 +5,14 @@ red="\033[31m"
 over="\033[0m"
 base=`pwd`
 null="/dev/null"
+server="deploy.felicity.family"
 soft=""
+pkgs=""
+temp_dir="/tmp/$soft"
 
+
+
+[ ! -d $temp_dir ] && mkdir -p $temp_dir
 download(){
     echo '###### Download ######'
 
@@ -14,9 +20,9 @@ download(){
 }
 
 compile(){
-  echo '###### Compile ######'
+    echo '###### Compile ######'
 
-  [ $? -eq 0 ] && echo -e "Compile $soft \t ${green}[OK]${over}"  || echo -e "Compile $soft \t ${red}[Failed]${over}"
+    [ $? -eq 0 ] && echo -e "Compile $soft \t ${green}[OK]${over}"  || echo -e "Compile $soft \t ${red}[Failed]${over}"
 }
 
 install(){
@@ -44,8 +50,10 @@ clean(){
 }
 
 readme(){
-    echo '###### Generate readme ######'
-
+    echo '###### Summary Info ######'
+    echo """
+    Content
+    Port: 8080"""
     [ $? -eq 0 ] && echo -e "Generate readme $soft \t ${green}[OK]${over}" || echo -e "Generate readme $soft \t ${red}[Failed]${over}"
 }
 

@@ -14,7 +14,7 @@ temp_dir="/tmp/tengine_install"
 download(){
     echo '###### Download ######'
     wget $server/tarball/$soft -P $temp_dir
-    [ $? -eq 0 ] && echo -e "Download tengine \t ${green}[OK]${over}"  || echo -e "Download $soft \t ${red}[Failed]${over}"
+    [ $? -eq 0 ] && echo -e "Download $soft \t ${green}[OK]${over}"  || echo -e "Download $soft \t ${red}[Failed]${over}"
 }
 
 require(){
@@ -22,44 +22,57 @@ require(){
     [ $? -eq 0 ] && echo -e "Install $soft require \t ${green}[OK]${over}" || echo -e "Download $soft \t ${red}[Failed]${over}"
 }
 
+compile(){
+    echo '###### Compile ######'
+    cd $temp_dir && tar xf $soft && cd tengine-2.1.2
+    ./configure --prefix=/opt/tengine  \
+                --with-http_ssl_module \
+                --with-http_flv_module \
+                --with-http_stub_status_module    \
+                --with-http_gzip_static_module    \
+                --with-http_upstream_check_module \
+                --with-http_realip_module         \
+                --with-pcre &> $null
+    [ $? -eq 0 ] && echo -e "Compile $soft \t ${green}[OK]${over}"  || echo -e "Compile $soft \t ${red}[Failed]${over}"
+}
+
 install(){
     echo '###### Install ######'
-    cd $temp_dir && tar xf $soft -C /opt &> $null
-    useradd -M -s /sbin/nologin nginx
+    make &> $null && make install $> $null
     [ $? -eq 0 ] && echo -e "Install $soft \t ${green}[OK]${over}"  || echo -e "Install $soft \t ${red}[Failed]${over}"
 }
 
 config(){
     echo '###### Config ######'
-    
+
     [ $? -eq 0 ] && echo -e "Config $soft \t ${green}[OK]${over}"   || echo -e "Config $soft \t ${red}[Failed]${over}"
 }
 
 startup(){
     echo '###### startup ######'
-
+    /opt/tengine/sbin/nginx
     [ $? -eq 0 ] && echo -e "Startup $soft \t ${green}[OK]${over}"  || echo -e "Startup $soft \t ${red}[Failed]${over}"
 }
 
 clean(){
     echo '###### clean ######'
-    /opt/tengine/sbin/nginx
+    rm -rf $temp_dir
     [ $? -eq 0 ] && echo -e "Clean $soft \t ${green}[OK]${over}"    || echo -e "Clean $soft \t ${red}[Failed]${over}"
 }
 
 readme(){
-    echo '###### Generate readme ######'
+    echo '###### Summary Info ######'
+    echo """
     Soft: Tengine-2.1.2
     Path: /opt/tengine
-    Port: 80
+    Port: 80"""
     [ $? -eq 0 ] && echo -e "Generate readme $soft \t ${green}[OK]${over}" || echo -e "Generate readme $soft \t ${red}[Failed]${over}"
 }
 
 go(){
   download
-  require
+  compile
   install
-  config
   startup
   clean
   readme

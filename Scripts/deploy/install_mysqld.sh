@@ -72,11 +72,12 @@ clean(){
 }
 
 readme(){
-    echo '###### Generate readme ######'
+    echo '###### Summary Info ######'
+    echo """
     MySQL Binary: $mysql_path/bin
     MySQL DBfile: $dbfile
     MySQL Config: /etc/my.cnf
-    MySQL Port:   3306
+    MySQL Port:   3306"""
     [ $? -eq 0 ] && echo -e "Generate readme $soft \t ${green}[OK]${over}" || echo -e "Generate readme $soft \t ${red}[Failed]${over}"
 }
 

@@ -58,7 +58,7 @@ clean(){
 }
 
 readme(){
-    echo '###### SummaryInfo ######'
+    echo '###### Summary Info ######'
     echo """
     Soft: tomcat-7
     Path: /opt/tomcat

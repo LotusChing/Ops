@@ -1,7 +1,13 @@
 #!/bin/bash
+host=`ip a s eth0 | grep 'inet ' |awk '{ split($2,a,"/"); print a[1]}'`
 user="lotus"
 pass="ching"
 db="admin"
+null="/dev/null"
+
+function ping(){
+    echo "db.serverStatus().opcounters"| mongo $host -u $user -p $pass --authenticationDatabase=$db &> /dev/null && echo 1
+}
 
 function insert(){
     echo "db.serverStatus().opcounters"| mongo -u $user -p $pass --authenticationDatabase=$db | awk -F':' '/insert/ {split($2,a,","); print a[1]}'

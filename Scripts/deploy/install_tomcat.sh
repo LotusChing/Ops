@@ -53,6 +53,7 @@ startup(){
 clean(){
     echo '###### clean ######'
     rm -rf $temp_dir
+    rm -f $0
     [ $? -eq 0 ] && echo -e "Clean $soft \t ${green}[OK]${over}"    || echo -e "Clean $soft \t ${red}[Failed]${over}"
 }
 

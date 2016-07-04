@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+base=`pwd`
 green="\033[32m"
 red="\033[31m"
 over="\033[0m"
@@ -26,7 +27,8 @@ download(){
 
 install(){
     echo '###### Install ######'
-    cd $temp_dir && tar xf $pkgs -C /opt/tomcat-7
+    cd $temp_dir && tar xf $pkgs -C /opt/
+    mv /opt/apache-tomcat-7.0.70 /opt/tomcat-7
     ln -s /opt/tomcat-7 /opt/tomcat
     [ $? -eq 0 ] && echo -e "Install $soft \t ${green}[OK]${over}"    || echo -e "Install $soft \t ${red}[Failed]${over}"
 }
@@ -41,20 +43,20 @@ CATALINA_HOME=/opt/tomcat-7
 export JAVA_HOME PATH CATALINA_HOME
 EOF
     source /etc/profile
-    [ $? -eq 0 ] && echo -e "Config $soft \t ${green}[OK]${over}"   || echo -e "Config $soft \t ${red}[Failed]${over}"
+    [ $? -eq 0 ] && echo -e "Config $soft \t ${green}[OK]${over}"     || echo -e "Config $soft \t ${red}[Failed]${over}"
 }
 
 startup(){
     echo '###### startup ######'
     /opt/tomcat/bin/startup.sh &> $null
-    [ $? -eq 0 ] && echo -e "Startup $soft \t ${green}[OK]${over}"  || echo -e "Startup $soft \t ${red}[Failed]${over}"
+    [ $? -eq 0 ] && echo -e "Startup $soft \t ${green}[OK]${over}"    || echo -e "Startup $soft \t ${red}[Failed]${over}"
 }
 
 clean(){
     echo '###### clean ######'
     rm -rf $temp_dir
-    rm -f $0
-    [ $? -eq 0 ] && echo -e "Clean $soft \t ${green}[OK]${over}"    || echo -e "Clean $soft \t ${red}[Failed]${over}"
+    rm -f $base/$0
+    [ $? -eq 0 ] && echo -e "Clean $soft \t ${green}[OK]${over}"      || echo -e "Clean $soft \t ${red}[Failed]${over}"
 }
 
 readme(){

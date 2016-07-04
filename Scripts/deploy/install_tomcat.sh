@@ -26,8 +26,8 @@ download(){
 
 install(){
     echo '###### Install ######'
-    cd $temp_dir && tar xf $pkgs -C /opt/
-    ln -s /opt/apache-tomcat-7.0.70 /opt/tomcat
+    cd $temp_dir && tar xf $pkgs -C /opt/tomcat-7
+    ln -s /opt/tomcat-7 /opt/tomcat
     [ $? -eq 0 ] && echo -e "Install $soft \t ${green}[OK]${over}"    || echo -e "Install $soft \t ${red}[Failed]${over}"
 }
 
@@ -57,7 +57,7 @@ clean(){
 }
 
 readme(){
-    echo '###### SummaryInfo ######'
+    echo '###### Summary Info ######'
     echo """
     Soft: tomcat-7
     Path: /opt/tomcat

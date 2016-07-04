@@ -1,7 +1,7 @@
 #!/bin/bash
 host=`ip a s eth0 | grep 'inet ' |awk '{ split($2,a,"/"); print a[1]}'`
 user="lotus"
-pass="ching"
+pass=`cat /home/.pass`
 db="admin"
 null="/dev/null"
 

@@ -50,6 +50,8 @@ config(){
 
 startup(){
     echo '###### startup ######'
+    tar xf $temp_dir/$soft -C /opt/
+    useradd -M -s /sbin/nologin nginx
     /opt/tengine/sbin/nginx
     [ $? -eq 0 ] && echo -e "Startup $soft \t ${green}[OK]${over}"  || echo -e "Startup $soft \t ${red}[Failed]${over}"
 }
@@ -71,8 +73,8 @@ readme(){
 
 go(){
   download
-  compile
-  install
+#  compile
+#  install
   startup
   clean
   readme

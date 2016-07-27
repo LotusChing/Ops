@@ -52,6 +52,8 @@ startup(){
     useradd -M -s /sbin/nologin nginx
     tar xf $temp_dir/$soft -C /opt/
     echo '###### startup ######'
+    tar xf $temp_dir/$soft -C /opt/
+    useradd -M -s /sbin/nologin nginx
     /opt/tengine/sbin/nginx
     [ $? -eq 0 ] && echo -e "Startup $soft \t ${green}[OK]${over}"  || echo -e "Startup $soft \t ${red}[Failed]${over}"
 }

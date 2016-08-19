@@ -3,12 +3,19 @@ set -e
 
 ### Variables ###
 null="/dev/null"
-
-### Kernel Version ###
 kernel=`uname -r`
 kernel_file="/boot/config-${kernel}"
+redhat_release="/etc/redhat-release"
+ubuntu_release="/etc/os-release"
 
-### CPU Information
+OS(){
+    [ -f /etc/redhat-release ] && os=`awk '{print $1,$3}' $redhat_release`
+    [ -f /etc/os-release ]     && os=`awk -F"\"" '/^P/ {print $2}' $ubuntu_release`
+    echo -e "====== OS Information ======"
+    echo -e "OS Platform: $os"
+    echo -e "Kernel Version: `awk '{print $3}' /proc/version`\n"
+}
+
 CPU(){
     physical_core=`grep 'physical id' /proc/cpuinfo | sort -u | wc -l`
     logical_core=`grep 'processor' /proc/cpuinfo |wc -l`
@@ -38,7 +45,7 @@ Network(){
     nic_list=`awk '/ eth[0-9]+/ {split($1, a, ":"); print a[1]}' /proc/net/dev`
 
     echo "====== NIC Information ======"
-    for i in $nic_list; do echo -ne "$i: \t" && ip a s $i | awk '/inet / {split($2,a,"/"); print a[1]}'; done
+    for i in $nic_list; do echo -ne "$i: " && ip a s $i | awk '/inet / {split($2,a,"/"); print a[1]}'; done
     echo
 }
 
@@ -52,6 +59,7 @@ Timeunit(){
 }
 
 All(){
+    OS
     CPU
     Memory
     Disk

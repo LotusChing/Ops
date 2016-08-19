@@ -1,39 +1,61 @@
 #!/bin/bash
 set -e
 
+### Variables ###
+null="/dev/null"
+
 ### Kernel Version ###
 kernel=`uname -r`
 kernel_file="/boot/config-${kernel}"
- 
-### Hardware Information ###
 
-### Performance Information ###
+### CPU Information
+CPU(){
+    physical_core=`grep 'physical id' /proc/cpuinfo | sort -u | wc -l`
+    logical_core=`grep 'processor' /proc/cpuinfo |wc -l`
+    grep '^flags\b' /proc/cpuinfo | tail -1 | grep -o ht &> $null && hyper_threading=Ture || hyper_threading=False
 
-
-wiki(){
-    internal_ip=` ip a s eth2 | grep 'inet ' |awk '{ split($2,a,"/"); print a[1]}'`
-    os_version=`  awk '{print $1,$3}' /etc/redhat-release`
-    cpu_cores=`   grep "cores" /proc/cpuinfo |wc -l`
-    memory_size=` free -g|awk '/Mem/ {print $2}'`
-    disk_util=`   fdisk -l|awk '/Disk \/dev\/sda|vda|xvda/ {print $2, $3}'`
-                #`fdisk -l|awk '/Disk \/dev/ {print $2"\b "}'`
-    echo -e """
-    内网IP: $internal_ip
-    U/P:    root/root123123
-    OS:     $os_version
-    CPU:    ${cpu_cores}Core
-    MEM:    ${memory_size}G
-    DISK:   ${disk_util}
-"""
+    echo "====== CPU Information ======"
+    echo -e "Physical core: ${physical_core}\nLogical core: ${logical_core}\nHyper-threading: ${hyper_threading}\n"
 }
 
+Memory(){
+    memory_size_mb=`expr $(awk '/MemTotal/ {print $2}' /proc/meminfo) / 1024`
+    swap_size=`expr $(awk 'NR==2 {print $3}' /proc/swaps) / 1024`
 
-timeunit(){
+    echo "====== Memory Information ======"
+    echo -e "Memory Size: $memory_size_mb MB\nSwap Size: $swap_size MB\n"
+}
+
+Disk(){
+    disk_size=`awk '$4 !~ /dm/ && $2==0 {print $4":",$3 / 1024000 " GB"}' /proc/partitions`
+
+    echo "====== Disk Information ======"
+    echo -e "$disk_size \n"
+   
+}
+
+Network(){
+    nic_list=`awk '/ eth[0-9]+/ {split($1, a, ":"); print a[1]}' /proc/net/dev`
+
+    echo "====== NIC Information ======"
+    for i in $nic_list; do echo -ne "$i: \t" && ip a s $i | awk '/inet / {split($2,a,"/"); print a[1]}'; done
+    echo
+}
+
+Timeunit(){
     cpu_hz=`       grep '^CONFIG_HZ=' $kernel_file   | awk -F'=' '{print $2}'`
     time_unit=`    echo "scale=4; 1 / $cpu_hz"       | bc`
     clock_tick_ms=`echo "scale=4; $time_unit * 1000" | bc`
-    echo "clock_tick: ${clock_tick_ms}ms"
+
+    echo "====== Clock Tick Information ======"
+    echo -e "clock_tick: ${clock_tick_ms}ms\n"
 }
 
-
+All(){
+    CPU
+    Memory
+    Disk
+    Network
+    Timeunit
+}
 $1

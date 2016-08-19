@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+tabs 5
 
 ### Variables ###
 null="/dev/null"
@@ -7,6 +8,13 @@ kernel=`uname -r`
 kernel_file="/boot/config-${kernel}"
 redhat_release="/etc/redhat-release"
 ubuntu_release="/etc/os-release"
+
+Require(){
+    echo -e "Required Environment: "
+    echo -e "\tOS Platform: [Ubuntu 14.04 LTS| CentOS 6.x| RedHat 6.x]"
+    echo -e "\tKernel Version: Null"
+    echo -e "\tSpecial Package: Null"
+}
 
 OS(){
     [ -f /etc/redhat-release ] && os=`awk '{print $1,$3}' $redhat_release`
@@ -58,6 +66,18 @@ Timeunit(){
     echo -e "clock_tick: ${clock_tick_ms}ms\n"
 }
 
+Help(){
+    Require
+    echo -e "Usage: bash $0 [OS|CPU|Memory|Disk|Network|Timeunit|All|Help]"
+    echo -e "\tOS:        list os platform and kernel version."
+    echo -e "\tMemory:    list memory size and swap size."
+    echo -e "\tDisk:      list The number of disk and disk size."
+    echo -e "\tNetwork:   list network card information and ip address."
+    echo -e "\tTimeunit:  list os time unit."
+    echo -e "\tAll:       execute all function."
+    echo -e "\tHelp:      list script help information."
+}
+
 All(){
     OS
     CPU
@@ -66,4 +86,27 @@ All(){
     Network
     Timeunit
 }
-$1
+
+case $1 in 
+        OS)
+        OS
+        ;;
+        Memory)
+        Memory
+        ;;
+        Disk)
+        Disk
+        ;;
+        Network)
+        Network
+        ;;
+        Timeunit)
+        Timeunit
+        ;;
+        All)
+        All
+        ;;
+        *)
+        Help
+        ;;
+esac 

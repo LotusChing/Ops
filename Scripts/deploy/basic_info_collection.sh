@@ -20,7 +20,7 @@ CPU(){
 
 Memory(){
     memory_size_mb=`expr $(awk '/MemTotal/ {print $2}' /proc/meminfo) / 1024`
-    swap_size=`expr $(awk 'NR==2 {print $3}' /proc/swaps) / 1024`
+    [ `wc -l /proc/swaps | awk '{print $1}'` -gt 1 ] && swap_size=`expr $(awk 'NR==2 {print $3}' /proc/swaps) / 1024`  || swap_size="0"
 
     echo "====== Memory Information ======"
     echo -e "Memory Size: $memory_size_mb MB\nSwap Size: $swap_size MB\n"
@@ -38,7 +38,7 @@ Network(){
     nic_list=`awk '/ eth[0-9]+/ {split($1, a, ":"); print a[1]}' /proc/net/dev`
 
     echo "====== NIC Information ======"
-    for i in $nic_list; do echo -ne "$i: \t" && ip a s $i | awk '/inet / {split($2,a,"/"); print a[1]}'; done
+    for i in $nic_list; do echo -ne "$i: " && ip a s $i | awk '/inet / {split($2,a,"/"); print a[1]}'; done
     echo
 }
 

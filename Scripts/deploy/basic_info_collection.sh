@@ -27,7 +27,7 @@ CPU(){
 
 Memory(){
     memory_size_mb=`expr $(awk '/MemTotal/ {print $2}' /proc/meminfo) / 1024`
-    swap_size=`expr $(awk 'NR==2 {print $3}' /proc/swaps) / 1024`
+    [ `wc -l /proc/swaps | awk '{print $1}'` -gt 1 ] && swap_size=`expr $(awk 'NR==2 {print $3}' /proc/swaps) / 1024`  || swap_size="0"
 
     echo "====== Memory Information ======"
     echo -e "Memory Size: $memory_size_mb MB\nSwap Size: $swap_size MB\n"

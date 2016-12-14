@@ -3,10 +3,6 @@ import sys
 import time
 import psutil
 
-def round_percentage(number,ndigits):
-    return round(number*100,2)
-
-
 def monitor(interval=2):
     cpu_utilization = psutil.cpu_percent()
 

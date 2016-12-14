@@ -44,5 +44,6 @@ def monitor(interval=2):
     return cpu_info
 
 if __name__ == '__main__':
+    item = sys.argv[1]
     cpu_util_info = monitor()
-    print cpu_util_info
+    print cpu_util_info[item]

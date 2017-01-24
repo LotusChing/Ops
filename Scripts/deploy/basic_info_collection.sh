@@ -42,7 +42,7 @@ Memory(){
 }
 
 Disk(){
-    disk_size=`awk '$4 !~ /dm/ && $2==0 {print $4":",$3 / 1024000 " GB"}' /proc/partitions`
+    disk_size=`awk '$4 !~ /dm/ && $2==0 || $2==16 {print $4":",$3 / 1024000 " GB"}' /proc/partitions`
 
     echo "====== Disk Information ======"
     echo -e "$disk_size \n"

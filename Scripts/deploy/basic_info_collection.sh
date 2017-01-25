@@ -1,112 +1,49 @@
 #!/bin/bash
-set -e
-tabs 5
 
-### Variables ###
 null="/dev/null"
-kernel=`uname -r`
+## OS Kernel
 kernel_file="/boot/config-${kernel}"
 redhat_release="/etc/redhat-release"
 ubuntu_release="/etc/os-release"
+[ -f /etc/redhat-release ] && os=`awk '{print $1,$3}' $redhat_release`
+[ -f /etc/os-release ]     && os=`awk -F"\"" '/^P/ {print $2}' $ubuntu_release`
+kernel=`awk '{print $3}' /proc/version`
 
-Require(){
-    echo -e "Required Environment: "
-    echo -e "\tOS Platform: [Ubuntu 14.04 LTS| CentOS 6.x| RedHat 6.x]"
-    echo -e "\tKernel Version: Null"
-    echo -e "\tSpecial Package: Null"
-}
 
-OS(){
-    [ -f /etc/redhat-release ] && os=`awk '{print $1,$3}' $redhat_release`
-    [ -f /etc/os-release ]     && os=`awk -F"\"" '/^P/ {print $2}' $ubuntu_release`
-    echo -e "====== OS Information ======"
-    echo -e "OS Platform: $os"
-    echo -e "Kernel Version: `awk '{print $3}' /proc/version`\n"
-}
+### CPU
+processor=`grep 'processor' /proc/cpuinfo |wc -l`
+cpu_model=`grep "model name" /proc/cpuinfo|head -1 |awk -F":" '{print $2}'`
+grep '^flags\b' /proc/cpuinfo | tail -1 | grep -o ht &> $null && hyper_threading=Ture || hyper_threading=False
 
-CPU(){
-    physical_core=`grep 'physical id' /proc/cpuinfo | sort -u | wc -l`
-    logical_core=`grep 'processor' /proc/cpuinfo |wc -l`
-    grep '^flags\b' /proc/cpuinfo | tail -1 | grep -o ht &> $null && hyper_threading=Ture || hyper_threading=False
 
-    echo "====== CPU Information ======"
-    echo -e "Physical core: ${physical_core}\nLogical core: ${logical_core}\nHyper-threading: ${hyper_threading}\n"
-}
+### Memory
+memory_size=`expr $(awk '/MemTotal/ {print $2}' /proc/meminfo) / 1024`
 
-Memory(){
-    memory_size_mb=`expr $(awk '/MemTotal/ {print $2}' /proc/meminfo) / 1024`
-    [ `wc -l /proc/swaps | awk '{print $1}'` -gt 1 ] && swap_size=`expr $(awk 'NR==2 {print $3}' /proc/swaps) / 1024`  || swap_size="0"
 
-    echo "====== Memory Information ======"
-    echo -e "Memory Size: $memory_size_mb MB\nSwap Size: $swap_size MB\n"
-}
+### Disk
+disk_size=$(echo `awk '$4 !~ /dm/ && $2==0 || $2==16  {print $4":",$3 / 1024000 " GB"}' /proc/partitions | grep -v "sr"`)
 
-Disk(){
-    disk_size=`awk '$4 !~ /dm/ && $2==0 || $2==16 {print $4":",$3 / 1024000 " GB"}' /proc/partitions`
 
-    echo "====== Disk Information ======"
-    echo -e "$disk_size \n"
-   
-}
+### Network
+nic_list=`egrep -v "veth|docker|lo|Inter|face" /proc/net/dev | awk '{split($1, a, ":"); print a[1]}'`
+ip_list=`for i in $nic_list; do echo -ne "$i: " && ip a s $i | awk '/inet / {split($2,a,"/"); printf a[1] ", "}'; done`
 
-Network(){
-    nic_list=`awk '/ eth[0-9]+/ {split($1, a, ":"); print a[1]}' /proc/net/dev`
 
-    echo "====== NIC Information ======"
-    for i in $nic_list; do echo -ne "$i: " && ip a s $i | awk '/inet / {split($2,a,"/"); print a[1]}'; done
-    echo
-}
+### Basic
+hostname=`hostname`
+ping 120.24.80.34 -c 1 -w 2 &>$null && net_type=1 || net_type=2
 
-Timeunit(){
-    cpu_hz=`       grep '^CONFIG_HZ=' $kernel_file   | awk -F'=' '{print $2}'`
-    time_unit=`    echo "scale=4; 1 / $cpu_hz"       | bc`
-    clock_tick_ms=`echo "scale=4; $time_unit * 1000" | bc`
+### Hardware
+model=`dmidecode -s system-product-name`
+manufacturer=`dmidecode -s system-manufacturer`
+sn=`dmidecode -s system-serial-number`
+uuid=`dmidecode -s system-uuid`
+sku=`dmidecode -t system|grep "SKU"|awk -F':' '{print $2}'`
 
-    echo "====== Clock Tick Information ======"
-    echo -e "clock_tick: ${clock_tick_ms}ms\n"
-}
+echo "Format Data"
+server_info=`printf '{"os":"%s","kernel":"%s", "cpu_model":"%s", "processor":"%s", "hyper_threading":"%s",  "memory_size":"%s", "disk_size":"%s", "ip_list":"%s", "hostname":"%s", "net_type":"%s", "model":"%s", "manufacturer":"%s", "sn":"%s", "uuid":"%s", "sku":"%s"}\n' "$os" "$kernel" "$cpu_model" "$processor" "$hyper_threading" "$memory_size" "$disk_size" "$ip_list" "$hostname" "$net_type" "$model" "$manufacturer" "$sn" "$uuid" "$sku"`
+echo "$server_info"
 
-Help(){
-    Require
-    echo -e "Usage: bash $0 [OS|CPU|Memory|Disk|Network|Timeunit|All|Help]"
-    echo -e "\tOS:        list os platform and kernel version."
-    echo -e "\tMemory:    list memory size and swap size."
-    echo -e "\tDisk:      list The number of disk and disk size."
-    echo -e "\tNetwork:   list network card information and ip address."
-    echo -e "\tTimeunit:  list os time unit."
-    echo -e "\tAll:       execute all function."
-    echo -e "\tHelp:      list script help information."
-}
+#echo "Post Data"
+#curl -H "Content-Type: application/json" -X POST -d "$server_info" http://127.0.0.1:5002/server/reports
 
-All(){
-    OS
-    CPU
-    Memory
-    Disk
-    Network
-    Timeunit
-}
-
-case $1 in 
-        OS)
-        OS
-        ;;
-        Memory)
-        Memory
-        ;;
-        Disk)
-        Disk
-        ;;
-        Network)
-        Network
-        ;;
-        Timeunit)
-        Timeunit
-        ;;
-        All)
-        All
-        ;;
-        *)
-        Help
-        ;;
-esac 

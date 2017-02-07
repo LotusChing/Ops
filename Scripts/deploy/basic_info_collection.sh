@@ -26,7 +26,7 @@ disk_size=$(echo `awk '$4 !~ /dm/ && $2==0 || $2==16  {print $4":",$3 / 1024000 
 
 ### Network
 nic_list=`egrep -v "veth|docker|lo|Inter|face" /proc/net/dev | awk '{split($1, a, ":"); print a[1]}'`
-ip_list=`for i in $nic_list; do echo -ne "$i: " && ip a s $i | awk '/inet / {split($2,a,"/"); printf a[1] ", "}'; done`
+ip_list=`for i in $nic_list; do ip a s $i | awk '/inet / {split($2,a,"/"); printf a[1] ", "}'; done`
 
 
 ### Basic
@@ -34,11 +34,11 @@ hostname=`hostname`
 ping 120.24.80.34 -c 1 -w 2 &>$null && net_type=1 || net_type=2
 
 ### Hardware
-model=`dmidecode -s system-product-name`
-manufacturer=`dmidecode -s system-manufacturer`
-sn=`dmidecode -s system-serial-number`
-uuid=`dmidecode -s system-uuid`
-sku=`dmidecode -t system|grep "SKU"|awk -F':' '{print $2}'`
+model=`dmidecode -s system-product-name|grep -v "#"`
+manufacturer=`dmidecode -s system-manufacturer|grep -v "#"`
+sn=`dmidecode -s system-serial-number|grep -v "#"`
+uuid=`dmidecode -s system-uuid|grep -v "#"`
+sku=`dmidecode -t system|grep "SKU"|awk -F':' '{print $2}'|grep -v "#"`
 
 echo "Format Data"
 server_info=`printf '{"os":"%s","kernel":"%s", "cpu_model":"%s", "processor":"%s", "hyper_threading":"%s",  "memory_size":"%s", "disk_size":"%s", "ip_list":"%s", "hostname":"%s", "net_type":"%s", "model":"%s", "manufacturer":"%s", "sn":"%s", "uuid":"%s", "sku":"%s"}\n' "$os" "$kernel" "$cpu_model" "$processor" "$hyper_threading" "$memory_size" "$disk_size" "$ip_list" "$hostname" "$net_type" "$model" "$manufacturer" "$sn" "$uuid" "$sku"`
@@ -46,4 +46,3 @@ echo "$server_info"
 
 #echo "Post Data"
 #curl -H "Content-Type: application/json" -X POST -d "$server_info" http://127.0.0.1:5002/server/reports
-

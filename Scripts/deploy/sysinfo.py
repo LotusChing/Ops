@@ -1,6 +1,5 @@
 import subprocess
 import platform
-import requests
 import psutil
 import pprint
 import time
@@ -75,24 +74,20 @@ def get_memory_slot_count():
     # 获取总共的插槽
     cmd = 'dmidecode -t 17|grep -v "#" | grep "Size"|wc -l'
     total_slots_count = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    return total_slots_count.stdout.readline().decode().strip('\n')
+    return int(total_slots_count.stdout.readline().decode().strip('\n'))
 
 
 def get_memory_slot_use():
     # 获取已经使用的插槽
     cmd = 'dmidecode -q -t 17|grep -v "#" |grep " MB"|wc -l'
-    use_slots_count = subprocess.Popen(cmd, shell=True,
-                                       stdout=subprocess.PIPE,
-                                       stderr=subprocess.STDOUT)
-    return use_slots_count.stdout.readline().decode().strip('\n')
+    use_slots_count = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    return int(use_slots_count.stdout.readline().decode().strip('\n'))
 
 
 def use_slots_info():
     # 获取每个插槽内存条大小
     cmd = 'dmidecode -q -t 17 |grep -v "#"|grep " MB"'
-    use_slots_data = subprocess.Popen(cmd, shell=True,
-                                      stdout=subprocess.PIPE,
-                                      stderr=subprocess.STDOUT).stdout.readlines()
+    use_slots_data = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout.readlines()
     slots_info_list = [i.decode().split(': ')[1].strip('\n') for i in use_slots_data]
     return slots_info_list
 
@@ -148,11 +143,10 @@ def get_nic_info():
     return nic_info_list
 
 if __name__ == '__main__':
-    report_url = 'http://127.0.0.1:5000/server/report'
     data = {
         'os': get_os_release(),
         'hostname': platform.node(),
-        'manufacturers': get_manufacturer_name(),
+        'manufacturer': get_manufacturer_name(),
         'manufacture_date': get_manufacturer_date(),
         'server_model': get_server_model(),
         'is_vm': 1 if get_manufacturer_name().lower() in vm_platform_list else 0,
@@ -162,11 +156,9 @@ if __name__ == '__main__':
         'cpu_model': get_cpu_model(),
         'memory_slots_count': get_memory_slot_count(),
         'memory_slot_use': get_memory_slot_use(),
-        'memory_slot_info': str(use_slots_info()),
+        'memory_slot_info': use_slots_info(),
         'memory_size': memory_info('MemTotal'),
-        'disk_info': str(get_disk_info()),
-        'nic_info': str(get_nic_info()),
+        'disk_info': get_disk_info(),
+        'nic_info': get_nic_info(),
     }
-    pp.pprint(data)
-    resp = requests.post(url=report_url, data=json.dumps(data))
-    print(resp.content)
+    print(json.dumps(data, indent=4))
